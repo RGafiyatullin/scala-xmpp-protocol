@@ -18,6 +18,11 @@ case class OutputStream(outputStash: Queue[HighLevelEvent], streamsNsPrefix: Str
     (outputStash, copy(outputStash = Queue.empty))
   }
 
+  def outSingleOption: Option[(HighLevelEvent, OutputStream)] =
+    outputStash
+      .headOption
+      .map { hle => (hle, copy(outputStash = outputStash.tail)) }
+
   def in(streamEvent: StreamEvent): OutputStream =
     streamEvent match {
       case StreamEvent.StreamOpen(attributes) =>
