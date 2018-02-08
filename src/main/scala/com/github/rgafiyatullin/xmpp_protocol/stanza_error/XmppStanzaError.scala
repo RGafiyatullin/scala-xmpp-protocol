@@ -4,7 +4,6 @@ import com.github.rgafiyatullin.xml.common.QName
 import com.github.rgafiyatullin.xml.dom.{CData, Node}
 import com.github.rgafiyatullin.xml.dom_query.Implicits._
 import com.github.rgafiyatullin.xmpp_protocol.XmppConstants
-import com.github.rgafiyatullin.xmpp_protocol.stanza_error.XmppStanzaError.Internals
 
 sealed trait XmppStanzaError extends Exception {
   def definedCondition: String
@@ -46,6 +45,8 @@ sealed trait XmppStanzaError extends Exception {
 }
 
 sealed trait XmppStanzaErrorBase[T <: XmppStanzaErrorBase[T]] extends XmppStanzaError {
+  type Internals = XmppStanzaError.Internals
+
   val internals: Internals
   def withInternals(i: Internals): T
 

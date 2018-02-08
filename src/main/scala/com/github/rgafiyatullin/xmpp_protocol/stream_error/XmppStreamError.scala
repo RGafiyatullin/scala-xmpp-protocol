@@ -2,7 +2,6 @@ package com.github.rgafiyatullin.xmpp_protocol.stream_error
 
 import com.github.rgafiyatullin.xml.common.QName
 import com.github.rgafiyatullin.xml.dom.{CData, Element, Node}
-import com.github.rgafiyatullin.xmpp_protocol.stream_error.XmppStreamError.Internals
 import com.github.rgafiyatullin.xml.dom_query.Implicits._
 import com.github.rgafiyatullin.xml.dom_query.Predicate
 import com.github.rgafiyatullin.xmpp_protocol.XmppConstants
@@ -37,6 +36,7 @@ sealed trait XmppStreamError extends Exception {
 }
 
 sealed trait XmppStreamErrorBase[T <: XmppStreamErrorBase[T]] extends XmppStreamError {
+  type Internals = XmppStreamError.Internals
   val internals: Internals
   def withInternals(i: Internals): T
 

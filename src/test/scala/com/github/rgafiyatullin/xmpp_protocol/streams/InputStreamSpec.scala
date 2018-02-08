@@ -1,6 +1,5 @@
 package com.github.rgafiyatullin.xmpp_protocol.streams
 
-import com.github.rgafiyatullin.xml.common
 import com.github.rgafiyatullin.xml.common.{Attribute, HighLevelEvent, Position, QName}
 import com.github.rgafiyatullin.xml.dom.Element
 import com.github.rgafiyatullin.xmpp_protocol.XmppConstants

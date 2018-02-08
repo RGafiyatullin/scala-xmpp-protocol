@@ -2,6 +2,7 @@ package com.github.rgafiyatullin.xmpp_protocol.streams
 
 import com.github.rgafiyatullin.xml.common.HighLevelEvent
 import com.github.rgafiyatullin.xmpp_protocol.stream_error.XmppStreamError
+
 import scala.collection.immutable.Queue
 
 object InputStream {

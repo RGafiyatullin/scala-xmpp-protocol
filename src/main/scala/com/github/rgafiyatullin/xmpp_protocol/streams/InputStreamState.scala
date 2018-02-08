@@ -1,7 +1,7 @@
 package com.github.rgafiyatullin.xmpp_protocol.streams
 
-import com.github.rgafiyatullin.xml.dom.{Element, Node, NodeBuilder}
 import com.github.rgafiyatullin.xml.common.{HighLevelEvent, QName}
+import com.github.rgafiyatullin.xml.dom.{Node, NodeBuilder}
 import com.github.rgafiyatullin.xmpp_protocol.XmppConstants
 import com.github.rgafiyatullin.xmpp_protocol.stream_error.XmppStreamError
 
