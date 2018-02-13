@@ -36,6 +36,32 @@ object XmppConstants {
       object ietf {
         object params {
           object xmlNs {
+            object xmppSasl {
+              val ns = "urn:ietf:params:xml:ns:xmpp-sasl"
+
+              val auth: QName = qn(ns, "auth")
+              val challenge: QName = qn(ns, "challenge")
+              val response: QName = qn(ns, "response")
+              val success: QName = qn(ns, "success")
+              val failure: QName = qn(ns, "failure")
+              val abort: QName = qn(ns, "abort")
+
+              val mechanism: QName = qn(ns, "mechanism")
+              val mechanisms: QName = qn(ns, "mechanisms")
+
+              val aborted: QName = qn(ns, "aborted")
+              val accountDisabled: QName = qn(ns, "account-disabled")
+              val credentialsExpired: QName = qn(ns, "credentials-expired")
+              val encryptionRequired: QName = qn(ns, "encryption-required")
+              val incorrectEncoding: QName = qn(ns, "incorrect-encoding")
+              val invalidAuthzid: QName = qn(ns, "invalid-authzid")
+              val invalidMechanism: QName = qn(ns, "invalid-mechanism")
+              val malformedRequest: QName = qn(ns, "malformed-request")
+              val mechanismTooWeak: QName = qn(ns, "mechanism-too-weak")
+              val notAuthorized: QName = qn(ns, "not-authorized")
+              val temporaryAuthFailure: QName = qn(ns, "temporary-auth-failure")
+            }
+
             object xmppStanzas {
               val ns = "urn:ietf:params:xml:ns:xmpp-stanzas"
 

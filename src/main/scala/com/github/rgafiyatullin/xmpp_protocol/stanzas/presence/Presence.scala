@@ -12,14 +12,14 @@ sealed trait Presence
     with Stanza.HasAttributes[Presence]
 {
   def presenceType: PresenceType
-  def childNodes: Seq[Node]
+  protected def renderedChildNodes: Seq[Node]
 
   final override def toXml: Node =
     Node(XmppConstants.names.jabber.client.presence)
       .withAttributes(attributes.map(Attribute.Unprefixed.tupled).toSeq)
       .withAttribute("type", presenceType.toString)
       .withAttribute("id", idOption)
-      .withChildren(childNodes)
+      .withChildren(renderedChildNodes)
 }
 
 object Presence {
@@ -29,6 +29,7 @@ object Presence {
     extends Presence
       with Stanza.HasError[Error]
       with Stanza.HasIDOption[Request]
+      with Stanza.HasChildren[Request]
       with Stanza.HasAttributes[Request]
 
   sealed abstract class PresenceFamily[PT <: PresenceType] {
@@ -38,6 +39,8 @@ object Presence {
         with Stanza.HasIDOption[P]
         with Stanza.HasAttributes[P]
     {
+      final override protected def renderedChildNodes: Seq[Node] = children
+
       override def error(xmppStanzaError: XmppStanzaError): Error =
         Presence.error(xmppStanzaError)
 
@@ -55,16 +58,20 @@ object Presence {
         new Wrapper(this) {
           override def attributes: Map[String, String] =
             inner.attributes - name }
+
+      override def withChildren(newChildren: Seq[Node]): Request =
+        new Wrapper(this) {
+          override def children: Seq[Node] = newChildren }
     }
 
     protected final class Root(val presenceType: PresenceType) extends P {
-      override def childNodes: Seq[Node] = Seq.empty
+      override def children: Seq[Node] = Seq.empty
       override def attributes: Map[String, String] = Map.empty
       override def idOption: Option[String] = None
     }
     protected abstract class Wrapper(protected val inner: P) extends P {
       override def presenceType: PresenceType = inner.presenceType
-      override def childNodes: Seq[Node] = inner.childNodes
+      override def children: Seq[Node] = inner.children
       override def attributes: Map[String, String] = inner.attributes
       override def idOption: Option[String] = inner.idOption
     }
@@ -89,6 +96,9 @@ object Presence {
 
   sealed trait Error extends Presence {
     final override def presenceType: PresenceType = PresenceType.Error
+
+    final override protected def renderedChildNodes: Seq[Node] =
+      Seq(xmppStanzaError.toXml)
 
     def requestOption: Option[Presence.Request]
     def xmppStanzaError: XmppStanzaError
@@ -121,7 +131,6 @@ object Presence {
 
   private final case class ErrorRoot(xmppStanzaError: XmppStanzaError) extends Error {
     override def requestOption: Option[Request] = None
-    override def childNodes: Seq[Node] = Seq.empty
     override def idOption: Option[String] = None
     override def attributes: Map[String, String] = Map.empty
   }
@@ -129,7 +138,6 @@ object Presence {
   private abstract class ErrorWrapper(protected val inner: Error) extends Error {
     override def xmppStanzaError: XmppStanzaError = inner.xmppStanzaError
     override def requestOption: Option[Request] = inner.requestOption
-    override def childNodes: Seq[Node] = inner.childNodes
     override def idOption: Option[String] = inner.idOption
     override def attributes: Map[String, String] = inner.attributes
   }

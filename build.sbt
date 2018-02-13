@@ -17,5 +17,5 @@ credentials += Credentials(Path.userHome / ".ivy2" / ".credentials.wg-domain")
 
 libraryDependencies ++= Seq(
   "org.scalatest"                 %% "scalatest"  % "3.0.4",
-  "com.github.rgafiyatullin"      %% "xml"        % "0.2.0.2"
+  "com.github.rgafiyatullin"      %% "xml"        % "0.2.0.3"
 )

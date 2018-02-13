@@ -1,5 +1,6 @@
-package com.github.rgafiyatullin.xmpp_protocol.jid
+package jid
 
+import com.github.rgafiyatullin.xmpp_protocol.jid.Jid
 import org.scalatest.{FlatSpec, Matchers}
 
 class JidSpec extends FlatSpec with Matchers {

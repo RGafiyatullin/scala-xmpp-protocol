@@ -1,9 +1,10 @@
-package com.github.rgafiyatullin.xmpp_protocol.streams
+package streams
 
 import com.github.rgafiyatullin.xml.common.{Attribute, HighLevelEvent, Position, QName}
 import com.github.rgafiyatullin.xml.dom.Element
 import com.github.rgafiyatullin.xmpp_protocol.XmppConstants
 import com.github.rgafiyatullin.xmpp_protocol.stream_error.XmppStreamError
+import com.github.rgafiyatullin.xmpp_protocol.streams.{InputStream, StreamEvent}
 import org.scalatest.{FlatSpec, Matchers}
 
 class InputStreamSpec extends FlatSpec with Matchers {

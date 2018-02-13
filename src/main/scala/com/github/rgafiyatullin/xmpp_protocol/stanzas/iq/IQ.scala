@@ -27,8 +27,7 @@ sealed trait IQ
       .withAttributes(attributes.map(Attribute.Unprefixed.tupled).toSeq)
       .withAttribute("id", id)
       .withAttribute("type", iqType.toString)
-//      .withChildren(
-//        protectedBodyOption.fold(Seq.empty[Node])(_ +: childNodes))
+      .withChildren(renderedChildNodes)
 }
 
 object IQ {

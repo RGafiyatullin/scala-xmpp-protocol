@@ -1,8 +1,9 @@
-package com.github.rgafiyatullin.xmpp_protocol.streams
+package streams
 
 import com.github.rgafiyatullin.xml.common.Attribute
 import com.github.rgafiyatullin.xml.stream_writer.high_level_writer.HighLevelWriter
 import com.github.rgafiyatullin.xmpp_protocol.XmppConstants
+import com.github.rgafiyatullin.xmpp_protocol.streams.{OutputStream, StreamEvent}
 import org.scalatest.{FlatSpec, Matchers}
 
 class OutputStreamSpec extends FlatSpec with Matchers {

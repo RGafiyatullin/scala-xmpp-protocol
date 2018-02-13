@@ -12,14 +12,15 @@ sealed trait Message
     with Stanza.HasAttributes[Message]
 {
   def messageType: MessageType
-  def childNodes: Seq[Node]
+
+  protected def renderedChildNodes: Seq[Node]
 
   final override def toXml: Node =
     Node(XmppConstants.names.jabber.client.message)
       .withAttributes(attributes.map(Attribute.Unprefixed.tupled).toSeq)
       .withAttribute("type", messageType.toString)
       .withAttribute("id", idOption)
-      .withChildren(childNodes)
+      .withChildren(renderedChildNodes)
 
 }
 
@@ -39,9 +40,16 @@ object Message {
   sealed trait Request
     extends Message
       with Stanza.HasIDOption[Request]
+      with Stanza.HasChildren[Request]
       with Stanza.HasAttributes[Request]
       with Stanza.HasError[Error]
   {
+    final override protected def renderedChildNodes: Seq[Node] = children
+
+    def withMessageType(newMessageType: MessageType): Request =
+      new RequestWrapper(this) {
+        override def messageType: MessageType = newMessageType }
+
     override def error(xmppStanzaError: XmppStanzaError): Error =
       error(xmppStanzaError).withRequest(this)
 
@@ -55,28 +63,24 @@ object Message {
         override def attributes: Map[String, String] =
           inner.attributes - name }
 
-    def withMessageType(newMessageType: MessageType): Request =
-      new RequestWrapper(this) {
-        override def messageType: MessageType = newMessageType }
-
-    def withIdOption(newIdOption: Option[String]): Request =
+    override def withIdOption(newIdOption: Option[String]): Request =
       new RequestWrapper(this) {
         override def idOption: Option[String] = newIdOption }
 
-    def withChildNodes(newChildNodes: Seq[Node]): Request =
+    override def withChildren(newChildNodes: Seq[Node]): Request =
       new RequestWrapper(this) {
-        override def childNodes: Seq[Node] = newChildNodes }
+        override def children: Seq[Node] = newChildNodes }
 
   }
 
   private final case class RequestRoot(messageType: MessageType) extends Request {
     override def idOption: Option[String] = None
     override def attributes: Map[String, String] = Map.empty
-    override def childNodes: Seq[Node] = Seq.empty
+    override def children: Seq[Node] = Seq.empty
   }
   private abstract class RequestWrapper(protected val inner: Request) extends Request {
     override def messageType: MessageType = inner.messageType
-    override def childNodes: Seq[Node] = inner.childNodes
+    override def children: Seq[Node] = inner.children
     override def attributes: Map[String, String] = inner.attributes
     override def idOption: Option[String] = inner.idOption
   }
@@ -87,6 +91,13 @@ object Message {
       with Stanza.HasAttributes[Error]
   {
     final override def messageType: MessageType = MessageType.Error
+    final override protected def renderedChildNodes: Seq[Node] = Seq(xmppStanzaError.toXml)
+
+    def xmppStanzaError: XmppStanzaError
+    def withXmppStanzaError(newXmppStanzaError: XmppStanzaError): Error =
+      new ErrorWrapper(this) {
+        override def xmppStanzaError: XmppStanzaError = newXmppStanzaError
+      }
 
     def requestOption: Option[Message.Request]
     def withRequest(request: Message.Request): Message.Error =
@@ -115,9 +126,8 @@ object Message {
       }
   }
 
-  final case class ErrorRoot(error: XmppStanzaError) extends Error {
+  final case class ErrorRoot(xmppStanzaError: XmppStanzaError) extends Error {
     override def requestOption: Option[Request] = None
-    override def childNodes: Seq[Node] = Seq.empty
     override def attributes: Map[String, String] = Map.empty
     override def idOption: Option[String] = None
   }
@@ -125,7 +135,7 @@ object Message {
   private abstract class ErrorWrapper(protected val inner: Error) extends Error {
     override def idOption: Option[String] = inner.idOption
     override def requestOption: Option[Request] = inner.requestOption
-    override def childNodes: Seq[Node] = inner.childNodes
     override def attributes: Map[String, String] = inner.attributes
+    override def xmppStanzaError: XmppStanzaError = inner.xmppStanzaError
   }
 }

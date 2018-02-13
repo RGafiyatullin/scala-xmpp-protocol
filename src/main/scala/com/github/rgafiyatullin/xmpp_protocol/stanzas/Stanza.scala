@@ -15,6 +15,7 @@ object Stanza {
     extends Stanza
       with HasIDOption[Unsupported]
       with HasAttributes[Unsupported]
+      with HasChildren[Unsupported]
   {
     override def idOption: Option[String] = node.attribute("id")
     override def withIdOption(newIdOption: Option[String]): Unsupported =
@@ -30,6 +31,12 @@ object Stanza {
 
     override def withoutAttribute(name: String): Unsupported =
       copy(node = node.withAttribute(name, None))
+
+
+    override def children: Seq[Node] = node.children
+
+    override def withChildren(newChildren: Seq[Node]): Unsupported =
+      copy(node = node.withChildren(newChildren))
 
     override def toXml: Node = node
   }
@@ -83,6 +90,17 @@ object Stanza {
   trait HasAttributes[+Self <: HasAttributes[Self]] extends HasAttributes.Untyped {
     override def withAttribute(name: String, value: String): Self
     override def withoutAttribute(name: String): Self
+  }
+
+  object HasChildren {
+    sealed trait Untyped extends Stanza {
+      def children: Seq[Node]
+      def withChildren(newChildren: Seq[Node]): Untyped
+    }
+  }
+  trait HasChildren[+Self <: HasChildren[Self]] extends HasChildren.Untyped {
+    override def children: Seq[Node]
+    override def withChildren(newChildren: Seq[Node]): Self
   }
 
   trait HasError[+Error <: Stanza] extends HasError.Untyped {
