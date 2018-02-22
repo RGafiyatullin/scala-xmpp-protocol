@@ -20,6 +20,9 @@ private[streams] object InputStreamState {
                              ) extends InputStreamState
   {
     override def handleEvent: PartialFunction[HighLevelEvent, InputStreamState] = {
+      case _: HighLevelEvent.Whitespace =>
+        copy(eventOption = None)
+
       case HighLevelEvent.ElementOpen(_, _, localName, ns, streamAttributes)
         if qn(ns, localName) == XmppConstants.names.streams.stream
       =>
@@ -46,7 +49,7 @@ private[streams] object InputStreamState {
                          ) extends InputStreamState
   {
     override def handleEvent: PartialFunction[HighLevelEvent, InputStreamState] = {
-      case HighLevelEvent.Whitespace(_, _) =>
+      case _: HighLevelEvent.Whitespace =>
         copy(eventOption = None)
 
       case HighLevelEvent.ElementOpen(_, _, localName, ns, _)
@@ -76,9 +79,7 @@ private[streams] object InputStreamState {
   }
 
 
-  case class BuildingStanza(
-                             stanzaBuilder: NodeBuilder
-                           ) extends InputStreamState
+  case class BuildingStanza(stanzaBuilder: NodeBuilder) extends InputStreamState
   {
     override def handleEvent: PartialFunction[HighLevelEvent, InputStreamState] = {
       case HighLevelEvent.Whitespace(_, _) => this
@@ -90,7 +91,17 @@ private[streams] object InputStreamState {
             copy(stanzaBuilder = nextStanzaBuilder)
 
           case Some(stanza: Node) =>
-            val event = StreamEvent.Stanza(stanza)
+            val event =
+              stanza.qName match {
+                case XmppConstants.names.streams.error =>
+                  StreamEvent.StreamError(
+                    XmppStreamError.fromStanza(stanza)
+                      .getOrElse(
+                        XmppStreamError.UndefinedCondition()
+                          .withText("Failed to parse stream-error from: %s".format(stanza.rendered))))
+                case _ =>
+                  StreamEvent.Stanza(stanza)
+              }
             ExpectStanza(Some(event))
 
           case Some(nonElement) =>
@@ -108,10 +119,10 @@ private[streams] object InputStreamState {
   }
 
   case class StreamError(xmppStreamError: XmppStreamError) extends InputStreamState {
-    override def eventOption: Option[StreamEvent] = Some(StreamEvent.StreamError(xmppStreamError))
+    override def eventOption: Option[StreamEvent] = throw xmppStreamError
 
     override def handleEvent: PartialFunction[HighLevelEvent, InputStreamState] = {
-      case _ => this
+      case _ => StreamClosed(StreamEvent.StreamClose())
     }
   }
 

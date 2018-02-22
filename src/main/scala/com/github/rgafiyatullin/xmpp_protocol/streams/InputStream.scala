@@ -4,6 +4,7 @@ import com.github.rgafiyatullin.xml.common.HighLevelEvent
 import com.github.rgafiyatullin.xmpp_protocol.stream_error.XmppStreamError
 
 import scala.collection.immutable.Queue
+import scala.util.{Failure, Success, Try}
 
 object InputStream {
   def empty: InputStream =
@@ -12,22 +13,24 @@ object InputStream {
 }
 
 
-case class InputStream(state: InputStreamState, output: Queue[StreamEvent] = Queue.empty) {
+case class InputStream(state: InputStreamState, output: Queue[Try[StreamEvent]] = Queue.empty) {
   def in(hle: HighLevelEvent): InputStream = {
     val state1 = state.handleEvent.applyOrElse(hle, unexpectedParserEvent)
-    state1.eventOption match {
-      case None =>
+    Try(state1.eventOption) match {
+      case Success(None) =>
         copy(state = state1)
-      case Some(event) =>
-        copy(state = state1, output = output.enqueue(event))
+      case Success(Some(event)) =>
+        copy(state = state1, output = output.enqueue(Success(event)))
+      case Failure(reason) =>
+        copy(state = state1, output = output.enqueue(Failure(reason)))
     }
   }
 
   def out: (Option[StreamEvent], InputStream) =
-    (output.headOption, copy(output = output.drop(1)))
+    (output.headOption.map(_.get), copy(output = output.drop(1)))
 
   def outAll: (Seq[StreamEvent], InputStream) =
-    (output, copy(output = Queue.empty))
+    (output.map(_.get), copy(output = Queue.empty))
 
   def expectStreamOpen: InputStream =
     copy(state = InputStreamState.ExpectStreamOpen(None))
