@@ -5,12 +5,15 @@ import com.github.rgafiyatullin.xml.dom.{CData, Element, Node}
 import com.github.rgafiyatullin.xml.dom_query.Implicits._
 import com.github.rgafiyatullin.xml.dom_query.Predicate
 import com.github.rgafiyatullin.xmpp_protocol.XmppConstants
+import com.github.rgafiyatullin.xmpp_protocol.error_cause.CauseToXml
 
-sealed trait XmppStreamError extends Exception {
+sealed trait XmppStreamError extends Exception with CauseToXml {
   def reason: Option[Throwable]
   def withReason(r: Throwable): XmppStreamError
   def withReason(ro: Option[Throwable]): XmppStreamError
 
+
+  override def getCause: Throwable = reason.orNull
 
   def text: Option[String]
   def withText(t: String): XmppStreamError
@@ -22,6 +25,9 @@ sealed trait XmppStreamError extends Exception {
     "XmppStreamError(%s): %s".format(definedCondition, reason)
 
   def toXml: Node =
+    toXml(dumpCauses = false)
+
+  def toXml(dumpCauses: Boolean): Node =
     Element(
       XmppConstants.names.streams.error,
       Seq(),
@@ -32,7 +38,7 @@ sealed trait XmppStreamError extends Exception {
           text.map {
             str =>
               Element(XmppConstants.names.urn.ietf.params.xmlNs.xmppStreams.text, Seq(), Seq(CData(str)))
-          }.toSeq)))
+          }.toSeq ++ causesToXml(dumpCauses).toSeq)))
 }
 
 sealed trait XmppStreamErrorBase[T <: XmppStreamErrorBase[T]] extends XmppStreamError {

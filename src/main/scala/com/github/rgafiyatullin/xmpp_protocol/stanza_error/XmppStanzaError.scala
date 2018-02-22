@@ -4,8 +4,9 @@ import com.github.rgafiyatullin.xml.common.QName
 import com.github.rgafiyatullin.xml.dom.{CData, Node}
 import com.github.rgafiyatullin.xml.dom_query.Implicits._
 import com.github.rgafiyatullin.xmpp_protocol.XmppConstants
+import com.github.rgafiyatullin.xmpp_protocol.error_cause.CauseToXml
 
-sealed trait XmppStanzaError extends Exception {
+sealed trait XmppStanzaError extends Exception with CauseToXml {
   def definedCondition: String
 
   def errorType: XmppStanzaErrorType
@@ -14,6 +15,9 @@ sealed trait XmppStanzaError extends Exception {
   def reason: Option[Throwable]
   def withReason(r: Throwable): XmppStanzaError
   def withReason(ro: Option[Throwable]): XmppStanzaError
+
+
+  override def getCause: Throwable = reason.orNull
 
   def text: Option[String]
   def withText(t: String): XmppStanzaError
@@ -26,21 +30,22 @@ sealed trait XmppStanzaError extends Exception {
       case Some(textDefined) =>
         "XmppStanzaError(%s, \"%s\"): %s".format(definedCondition, textDefined, reason)
     }
-  def toXml: Node = {
-    val noText =
-      Node(XmppConstants.names.jabber.client.error)
-        .withAttribute("type", errorType.toString)
-          .withChildren(Seq(
-            Node(QName(XmppConstants.names.urn.ietf.params.xmlNs.xmppStanzas.ns, definedCondition))))
 
-    text match {
-      case None => noText
-      case Some(t) =>
-        val textChild =
-          Node(XmppConstants.names.urn.ietf.params.xmlNs.xmppStanzas.text)
-            .withChildren(Seq(CData(t)))
-        noText.withChildren(noText.children ++ Seq(textChild))
-    }
+  def toXml: Node = toXml(dumpCauses = false)
+
+  def toXml(dumpCauses: Boolean): Node = {
+    val causeOption = causesToXml(dumpCauses)
+    val textOption =
+      text.map(t =>
+        Node(XmppConstants.names.urn.ietf.params.xmlNs.xmppStanzas.text)
+          .withChildren(Seq(CData(t))))
+
+    Node(XmppConstants.names.jabber.client.error)
+      .withAttribute("type", errorType.toString)
+      .withChildren(
+        Seq(Node(QName(XmppConstants.names.urn.ietf.params.xmlNs.xmppStanzas.ns, definedCondition))) ++
+        textOption.toSeq ++
+        causeOption.toSeq)
   }
 }
 

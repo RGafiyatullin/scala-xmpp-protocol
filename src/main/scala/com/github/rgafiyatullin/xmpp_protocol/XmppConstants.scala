@@ -14,6 +14,15 @@ object XmppConstants {
       val error: QName = qn(ns, "error")
     }
 
+    object cause {
+      val ns = "errors"
+
+      val cause: QName = qn(ns, "cause")
+      val message: QName = qn(ns, "message")
+      val stack: QName = qn(ns, "stacktrace")
+      val frame: QName = qn(ns, "frame")
+    }
+
     object jabber {
       object iq {
         object roster {
