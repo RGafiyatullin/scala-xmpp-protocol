@@ -2,7 +2,7 @@ name := "xmpp-protocol"
 
 organization := "com.github.rgafiyatullin"
 
-version := "0.5.2.0"
+version := "0.5.2.1"
 
 scalaVersion := "2.12.4"
 

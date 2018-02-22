@@ -11,7 +11,7 @@ object OutputStream {
     OutputStream(Queue.empty)
 }
 
-case class OutputStream(outputStash: Queue[HighLevelEvent], streamsNsPrefix: String = "") {
+case class OutputStream(outputStash: Queue[HighLevelEvent], streamsNsPrefix: String = "", dumpStreamErrorCause: Boolean = false) {
   private val emptyPosition: Position = Position.withoutPosition
 
   def out: (Queue[HighLevelEvent], OutputStream) = {
@@ -55,6 +55,6 @@ case class OutputStream(outputStash: Queue[HighLevelEvent], streamsNsPrefix: Str
         copy(outputStash = stanzaHLEvents.foldLeft(outputStash)(_.enqueue(_)))
 
       case StreamEvent.StreamError(xmppStreamError) =>
-        in(StreamEvent.Stanza(xmppStreamError.toXml))
+        in(StreamEvent.Stanza(xmppStreamError.toXml(dumpStreamErrorCause)))
     }
 }
