@@ -1,5 +1,6 @@
 package com.github.rgafiyatullin.xmpp_protocol.error_cause
 
+import com.github.rgafiyatullin.xml.common.QName
 import com.github.rgafiyatullin.xml.dom.{CData, Node}
 import com.github.rgafiyatullin.xmpp_protocol.XmppConstants
 
@@ -8,18 +9,21 @@ trait CauseToXml extends Exception {
     if (!dumpCauses) None
     else causeOptionToXmlOption(Option(getCause))
 
+  private def textNode(qn: QName, text: String): Node =
+    Node(qn).withChildren(Seq(CData(text)))
+
   def causeToXml(cause: Throwable): Node =
     Node(XmppConstants.names.cause.cause)
       .withChildren(
         Seq(
-          Node(XmppConstants.names.cause.message)
-            .withChildren(Seq(CData(cause.getMessage))),
+          textNode(XmppConstants.names.cause.exceptionType, cause.getClass.getCanonicalName),
+          textNode(XmppConstants.names.cause.message, cause.getMessage),
           Node(XmppConstants.names.cause.stack)
             .withChildren(
               cause.getStackTrace.map(ste =>
-                Node(XmppConstants.names.cause.frame)
-                  .withChildren(Seq(CData(ste.toString)))))
-        ) ++ causeOptionToXmlOption(Option(cause.getCause)).toSeq)
+                textNode(XmppConstants.names.cause.frame, ste.toString)))
+        ) ++
+          causeOptionToXmlOption(Option(cause.getCause)).toSeq)
 
   def causeOptionToXmlOption(causeOption: Option[Throwable]): Option[Node] =
     for { cause <- causeOption } yield causeToXml(cause)

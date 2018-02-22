@@ -15,9 +15,10 @@ object XmppConstants {
     }
 
     object cause {
-      val ns = "errors"
+      val ns = "error:cause"
 
       val cause: QName = qn(ns, "cause")
+      val exceptionType: QName = qn(ns, "exception-type")
       val message: QName = qn(ns, "message")
       val stack: QName = qn(ns, "stacktrace")
       val frame: QName = qn(ns, "frame")
