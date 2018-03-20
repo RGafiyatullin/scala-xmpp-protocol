@@ -6,6 +6,8 @@ import com.github.rgafiyatullin.xmpp_protocol.XmppConstants
 import com.github.rgafiyatullin.xmpp_protocol.stanza_error.XmppStanzaError
 import com.github.rgafiyatullin.xmpp_protocol.stanzas.{Stanza, StanzaUtil}
 
+import scala.util.{Success, Try}
+
 sealed trait Message
   extends Stanza
     with Stanza.HasIDOption[Message]
@@ -138,4 +140,53 @@ object Message {
     override def attributes: Map[String, String] = inner.attributes
     override def xmppStanzaError: XmppStanzaError = inner.xmppStanzaError
   }
+
+  def decodeRequest: Stanza.Decoder[Message.Request] =
+    new Stanza.Decoder[Message.Request] {
+      private def messageTypeOption(node: Node): Option[MessageType] =
+        node.attribute("type")
+          .map(MessageType.decode)
+
+      private def isDefinedAtType(node: Node): Boolean =
+        Try(messageTypeOption(node)) match {
+          case Success(Some(MessageType.Error)) => false
+          case Success(Some(_)) => true
+          case _ => false
+        }
+
+
+      override def isDefinedAt(node: Node): Boolean =
+        node.qName == XmppConstants.names.jabber.client.message &&
+          isDefinedAtType(node)
+
+      override def apply(node: Node): Try[Request] = Try {
+        util.copyAttributesFromNode(
+          request(messageTypeOption(node).get)
+            .withChildren(node.children),
+          node, Set("id", "type")
+        )
+          .withChildren(node.children)
+          .withIdOption(node.attribute("id"))
+      }
+    }
+
+  def decodeError: Stanza.Decoder[Message.Error] =
+    new Stanza.Decoder[Message.Error] {
+      override def isDefinedAt(node: Node): Boolean =
+        node.qName == XmppConstants.names.jabber.client.message &&
+          node.attribute("type").contains(MessageType.Error.toString)
+
+      override def apply(node: Node): Try[Error] = Try {
+        val xse = XmppStanzaError.fromStanza(node)
+          .getOrElse(throw XmppStanzaError.BadRequest().withText("Failed to parse XSE"))
+
+        util.copyAttributesFromNode(
+          Message.error(xse),
+          node, Set("id", "type"))
+            .withIdOption(node.attribute("id"))
+      }
+    }
+
+  def decode: Stanza.Decoder[Message] =
+    decodeRequest orElse decodeError
 }
