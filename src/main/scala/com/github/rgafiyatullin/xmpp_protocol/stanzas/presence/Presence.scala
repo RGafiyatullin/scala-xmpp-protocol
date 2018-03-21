@@ -45,6 +45,8 @@ object Presence {
         with Stanza.HasAttributes[P]
         with Stanza.HasAddresses[P]
     {
+      override def presenceType: PT
+
       final override protected def renderedChildNodes: Seq[Node] = children
 
       override def error(xmppStanzaError: XmppStanzaError): Error =
@@ -73,13 +75,13 @@ object Presence {
           override def children: Seq[Node] = newChildren }
     }
 
-    protected final class Root(val presenceType: PresenceType) extends P {
+    protected final class Root(val presenceType: PT) extends P {
       override def children: Seq[Node] = Seq.empty
       override def attributes: Map[String, String] = Map.empty
       override def idOption: Option[String] = None
     }
     protected abstract class Wrapper(protected val inner: P) extends P {
-      override def presenceType: PresenceType = inner.presenceType
+      override def presenceType: PT = inner.presenceType
       override def children: Seq[Node] = inner.children
       override def attributes: Map[String, String] = inner.attributes
       override def idOption: Option[String] = inner.idOption
