@@ -52,6 +52,7 @@ object Presence {
       override def error(xmppStanzaError: XmppStanzaError): Error =
         Presence
           .error(xmppStanzaError)
+          .withIdOption(idOption)
           .withToOption(fromOption)
           .withFromOption(toOption)
 

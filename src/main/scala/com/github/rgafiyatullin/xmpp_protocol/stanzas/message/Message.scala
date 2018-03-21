@@ -58,6 +58,7 @@ object Message {
       Message
         .error(xmppStanzaError)
         .withRequest(this)
+        .withIdOption(idOption)
         .withToOption(fromOption)
         .withFromOption(toOption)
 
