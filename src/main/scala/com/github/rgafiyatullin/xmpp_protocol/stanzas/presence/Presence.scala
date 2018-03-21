@@ -13,6 +13,7 @@ sealed trait Presence
   extends Stanza
     with Stanza.HasIDOption[Presence]
     with Stanza.HasAttributes[Presence]
+    with Stanza.HasAddresses[Presence]
 {
   def presenceType: PresenceType
   protected def renderedChildNodes: Seq[Node]
@@ -34,6 +35,7 @@ object Presence {
       with Stanza.HasIDOption[Request]
       with Stanza.HasChildren[Request]
       with Stanza.HasAttributes[Request]
+      with Stanza.HasAddresses[Request]
 
   sealed abstract class PresenceFamily[PT <: PresenceType] {
     sealed trait P
@@ -41,14 +43,15 @@ object Presence {
         with Stanza.HasError[Error]
         with Stanza.HasIDOption[P]
         with Stanza.HasAttributes[P]
+        with Stanza.HasAddresses[P]
     {
       final override protected def renderedChildNodes: Seq[Node] = children
 
       override def error(xmppStanzaError: XmppStanzaError): Error =
         Presence
           .error(xmppStanzaError)
-          .withAttributeOption("from", attributeOption("to"))
-          .withAttributeOption("to", attributeOption("from"))
+          .withToOption(fromOption)
+          .withFromOption(toOption)
 
       override def withIdOption(newIdOption: Option[String]): P =
         new Wrapper(this) {
@@ -104,6 +107,7 @@ object Presence {
     extends Presence
       with Stanza.HasIDOption[Error]
       with Stanza.HasAttributes[Error]
+      with Stanza.HasAddresses[Error]
   {
     final override def presenceType: PresenceType = PresenceType.Error
 

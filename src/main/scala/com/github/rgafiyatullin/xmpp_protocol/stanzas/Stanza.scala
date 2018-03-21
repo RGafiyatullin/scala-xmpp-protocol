@@ -2,6 +2,7 @@ package com.github.rgafiyatullin.xmpp_protocol.stanzas
 
 import com.github.rgafiyatullin.xml.common.Attribute
 import com.github.rgafiyatullin.xml.dom.Node
+import com.github.rgafiyatullin.xmpp_protocol.jid.Jid
 import com.github.rgafiyatullin.xmpp_protocol.stanza_error.XmppStanzaError
 
 import scala.util.{Success, Try}
@@ -96,6 +97,34 @@ object Stanza {
 
     final def withAttributeOption(name: String, valueOption: Option[String]): Self =
       valueOption.fold(withoutAttribute(name))(withAttribute(name, _))
+  }
+
+  object HasAddresses {
+    sealed trait Untyped extends Stanza {
+      this: Stanza.HasAttributes.Untyped =>
+      def fromOption: Option[Jid] =
+        attributeOption("from").map(Jid.parse)
+      def from: Jid =
+        fromOption.get
+
+      def toOption: Option[Jid] =
+        attributeOption("to").map(Jid.parse)
+      def to: Jid =
+        toOption.get
+    }
+  }
+  trait HasAddresses[+Self <: HasAddresses[Self] with HasAttributes[Self]]
+    extends HasAddresses.Untyped with HasAttributes[Self]
+  {
+    def withFrom(jid: Jid): Self = withAttribute("from", jid.toString)
+    def withoutFrom: Self = withoutAttribute("from")
+    final def withFromOption(jidOption: Option[Jid]): Self =
+      jidOption.fold(withoutFrom)(withFrom)
+
+    def withTo(jid: Jid): Self = withAttribute("to", jid.toString)
+    def withoutTo: Self = withoutAttribute("to")
+    final def withToOption(jidOption: Option[Jid]): Self =
+      jidOption.fold(withoutTo)(withTo)
   }
 
   object HasChildren {

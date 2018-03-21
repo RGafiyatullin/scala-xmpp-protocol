@@ -14,6 +14,7 @@ sealed trait IQ
   extends Stanza
     with Stanza.HasID[IQ]
     with Stanza.HasAttributes[IQ]
+    with Stanza.HasAddresses[IQ]
 {
   def iqType: IQType
   def attributes: Map[String, String]
@@ -118,6 +119,7 @@ object IQ {
       with Stanza.HasBody[Request]
       with Stanza.HasAttributes[Request]
       with Stanza.HasError[IQ.Error]
+      with Stanza.HasAddresses[Request]
   {
     override protected def renderedChildNodes: Seq[Node] = Seq(body)
 
@@ -131,8 +133,8 @@ object IQ {
       IQ
         .error(id, xmppStanzaError)
         .withRequest(this)
-        .withAttributeOption("from", attributeOption("to"))
-        .withAttributeOption("to", attributeOption("from"))
+        .withToOption(fromOption)
+        .withFromOption(toOption)
 
     def withBody(newBody: Node): Request =
       new RequestWrapper(this) {
@@ -179,12 +181,14 @@ object IQ {
     extends IQ
       with Stanza.HasID[Response]
       with Stanza.HasAttributes[Response]
+      with Stanza.HasAddresses[Response]
 
   sealed trait Result
     extends Response
       with Stanza.HasID[Result]
       with Stanza.HasBodyOption[Result]
       with Stanza.HasAttributes[Result]
+      with Stanza.HasAddresses[Result]
   {
     override protected def renderedChildNodes: Seq[Node] = bodyOption.toSeq
 
@@ -222,7 +226,12 @@ object IQ {
     override def childNodes: Seq[Node] = inner.childNodes
   }
 
-  sealed trait Error extends Response with Stanza.HasID[Error] with Stanza.HasAttributes[Error] {
+  sealed trait Error
+    extends Response
+      with Stanza.HasID[Error]
+      with Stanza.HasAttributes[Error]
+      with Stanza.HasAddresses[Error]
+  {
     override protected def renderedChildNodes: Seq[Node] = Seq(reason.toXml)
 
     final override def iqType: IQType.Error.type = IQType.Error

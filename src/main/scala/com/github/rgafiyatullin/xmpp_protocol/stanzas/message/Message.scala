@@ -12,6 +12,7 @@ sealed trait Message
   extends Stanza
     with Stanza.HasIDOption[Message]
     with Stanza.HasAttributes[Message]
+    with Stanza.HasAddresses[Message]
 {
   def messageType: MessageType
 
@@ -45,6 +46,7 @@ object Message {
       with Stanza.HasChildren[Request]
       with Stanza.HasAttributes[Request]
       with Stanza.HasError[Error]
+      with Stanza.HasAddresses[Request]
   {
     final override protected def renderedChildNodes: Seq[Node] = children
 
@@ -56,8 +58,8 @@ object Message {
       Message
         .error(xmppStanzaError)
         .withRequest(this)
-        .withAttributeOption("from", attributeOption("to"))
-        .withAttributeOption("to", attributeOption("from"))
+        .withToOption(fromOption)
+        .withFromOption(toOption)
 
     override def withAttribute(name: String, value: String): Request =
       new RequestWrapper(this) {
@@ -95,6 +97,7 @@ object Message {
     extends Message
       with Stanza.HasIDOption[Error]
       with Stanza.HasAttributes[Error]
+      with Stanza.HasAddresses[Error]
   {
     final override def messageType: MessageType = MessageType.Error
     final override protected def renderedChildNodes: Seq[Node] = Seq(xmppStanzaError.toXml)
