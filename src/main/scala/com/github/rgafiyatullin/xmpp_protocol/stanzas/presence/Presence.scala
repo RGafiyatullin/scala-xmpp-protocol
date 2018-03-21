@@ -45,7 +45,10 @@ object Presence {
       final override protected def renderedChildNodes: Seq[Node] = children
 
       override def error(xmppStanzaError: XmppStanzaError): Error =
-        Presence.error(xmppStanzaError)
+        Presence
+          .error(xmppStanzaError)
+          .withAttributeOption("from", attributeOption("to"))
+          .withAttributeOption("to", attributeOption("from"))
 
       override def withIdOption(newIdOption: Option[String]): P =
         new Wrapper(this) {

@@ -85,11 +85,17 @@ object Stanza {
       def attributes: Map[String, String]
       def withAttribute(name: String, value: String): Untyped
       def withoutAttribute(name: String): Untyped
+
+      final def attributeOption(name: String): Option[String] =
+        attributes.get(name)
     }
   }
   trait HasAttributes[+Self <: HasAttributes[Self]] extends HasAttributes.Untyped {
     override def withAttribute(name: String, value: String): Self
     override def withoutAttribute(name: String): Self
+
+    final def withAttributeOption(name: String, valueOption: Option[String]): Self =
+      valueOption.fold(withoutAttribute(name))(withAttribute(name, _))
   }
 
   object HasChildren {

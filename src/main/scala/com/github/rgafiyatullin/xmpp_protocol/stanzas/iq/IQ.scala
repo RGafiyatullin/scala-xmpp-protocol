@@ -128,7 +128,11 @@ object IQ {
       IQ.result(id)
 
     override def error(xmppStanzaError: XmppStanzaError): IQ.Error =
-      IQ.error(id, xmppStanzaError).withRequest(this)
+      IQ
+        .error(id, xmppStanzaError)
+        .withRequest(this)
+        .withAttributeOption("from", attributeOption("to"))
+        .withAttributeOption("to", attributeOption("from"))
 
     def withBody(newBody: Node): Request =
       new RequestWrapper(this) {

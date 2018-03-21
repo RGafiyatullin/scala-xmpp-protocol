@@ -53,7 +53,11 @@ object Message {
         override def messageType: MessageType = newMessageType }
 
     override def error(xmppStanzaError: XmppStanzaError): Error =
-      error(xmppStanzaError).withRequest(this)
+      Message
+        .error(xmppStanzaError)
+        .withRequest(this)
+        .withAttributeOption("from", attributeOption("to"))
+        .withAttributeOption("to", attributeOption("from"))
 
     override def withAttribute(name: String, value: String): Request =
       new RequestWrapper(this) {
