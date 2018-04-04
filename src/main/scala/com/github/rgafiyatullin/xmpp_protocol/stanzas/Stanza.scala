@@ -9,6 +9,9 @@ import scala.util.{Success, Try}
 
 trait Stanza {
   def toXml: Node
+
+  override def toString: String =
+    s"Stanza[xml: ${toXml.rendered}]"
 }
 
 object Stanza {
