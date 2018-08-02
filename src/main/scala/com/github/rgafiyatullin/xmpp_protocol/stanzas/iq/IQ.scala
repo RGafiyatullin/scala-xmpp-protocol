@@ -127,7 +127,10 @@ object IQ {
     def body: Node
 
     def result: IQ.Result =
-      IQ.result(id)
+      IQ
+        .result(id)
+        .withFromOption(toOption)
+        .withToOption(fromOption)
 
     override def error(xmppStanzaError: XmppStanzaError): IQ.Error =
       IQ
