@@ -1,6 +1,6 @@
 package com.github.rgafiyatullin.xmpp_protocol.stanzas
 
-import com.github.rgafiyatullin.xml.common.Attribute
+import com.github.rgafiyatullin.xml.common.{Attribute, QName}
 import com.github.rgafiyatullin.xml.dom.Node
 import com.github.rgafiyatullin.xmpp_protocol.jid.Jid
 import com.github.rgafiyatullin.xmpp_protocol.stanza_error.XmppStanzaError
@@ -151,7 +151,7 @@ object Stanza {
   }
 
   object HasBody {
-    sealed trait Untyped {
+    sealed trait Untyped extends Stanza {
       def body: Node
       def withBody(newBody: Node): Untyped
     }
@@ -162,7 +162,7 @@ object Stanza {
   }
 
   object HasBodyOption {
-    sealed trait Untyped {
+    sealed trait Untyped extends Stanza {
       def bodyOption: Option[Node]
       def withBodyOption(newBodyOption: Option[Node]): Untyped
       def withBody(newBody: Node): Untyped
