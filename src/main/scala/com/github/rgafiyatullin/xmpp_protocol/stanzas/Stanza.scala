@@ -10,6 +10,17 @@ import scala.util.{Success, Try}
 trait Stanza {
   def toXml: Node
 
+
+  override def equals(other: Any): Boolean =
+    other match {
+      case s: Stanza =>
+        // this is quite ugly but it's of
+        // an utter necessity to define equality somehow
+        s.toXml == toXml
+      case _ =>
+        false
+    }
+
   override def toString: String =
     s"Stanza[xml: ${toXml.rendered}]"
 }
