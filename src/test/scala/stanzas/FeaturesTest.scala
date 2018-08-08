@@ -49,8 +49,6 @@ final class FeaturesTest extends StanzasTest {
   val tests: Seq[(Features, Node)] =
       stanzas zip xmls
 
-  println(tests)
-
   val decoder: Stanza.Decoder[Features] = Features.decode
 
   "Features stanzas" should "have a sane equality operator" in {
