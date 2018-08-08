@@ -12,6 +12,7 @@ object XmppConstants {
       val stream: QName = qn(ns, "stream")
       val features: QName = qn(ns, "features")
       val error: QName = qn(ns, "error")
+      val required: QName = qn(ns, "required")
     }
 
     object cause {
