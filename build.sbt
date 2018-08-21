@@ -19,7 +19,7 @@ lazy val root = (project in file("."))
         }
       },
 
-      "com.github.rgafiyatullin"      %% "xml"        % "0.2.0.3"
+      "com.github.rgafiyatullin"      %% "xml"        % "0.2.1.0"
     ),
 
     publishTo := BuildEnv.publishTo,
