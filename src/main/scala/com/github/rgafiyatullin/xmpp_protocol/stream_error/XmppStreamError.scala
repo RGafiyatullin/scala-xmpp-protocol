@@ -14,6 +14,11 @@ sealed trait XmppStreamError extends Exception with CauseToXml {
 
 
   override def getCause: Throwable = reason.orNull
+  override def getMessage: String =
+    "Stream-Error[%s]%s"
+      .format(
+        definedCondition,
+        text.map(_ formatted ": %s").getOrElse(""))
 
   def text: Option[String]
   def withText(t: String): XmppStreamError

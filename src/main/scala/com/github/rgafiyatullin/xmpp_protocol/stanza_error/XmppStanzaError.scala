@@ -18,6 +18,11 @@ sealed trait XmppStanzaError extends Exception with CauseToXml {
 
 
   override def getCause: Throwable = reason.orNull
+  override def getMessage: String =
+    "Stanza-Error[%s]%s"
+      .format(
+        definedCondition,
+        text.map(_ formatted ": %s").getOrElse(""))
 
   def text: Option[String]
   def withText(t: String): XmppStanzaError
